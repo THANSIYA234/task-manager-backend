@@ -22,16 +22,22 @@ export class TaskService {
     private readonly logger: CustomLogger,
   ) {}
 
-  async getAllTasks() {
+  // Only return tasks for the logged-in user
+  async getAllTasks(userId: string) {
     try {
-      return await this.prismaService.task.findMany();
+      return await this.prismaService.task.findMany({
+        where: { userId }, // <-- filter by user
+        orderBy: { createdAt: 'desc' },
+      });
     } catch (error) {
       return ApiResponse.error('Task not created', HttpStatus.BAD_REQUEST);
     }
   }
 
-  async getTaskById(id: string) {
-    const task = await this.prismaService.task.findUnique({ where: { id } });
+  async getTaskById(id: string, userId: string) {
+    const task = await this.prismaService.task.findFirst({
+      where: { id, userId }, // <-- ensure user owns this task
+    });
     if (!task) {
       throw new NotFoundException(`Task with id: ${id} not found`);
     }
@@ -42,57 +48,65 @@ export class TaskService {
   }
 
   async createTask(createTaskDto: CreateTaskDto, userId: string) {
-    // Validate title
     if (!createTaskDto.title || createTaskDto.title.trim() === '') {
       throw new BadRequestException('title is required');
     }
 
-    // Set default status if none provided
     const status = createTaskDto.status || TaskStatus.OPEN;
 
-    const data = {
-      title: createTaskDto.title,
-      description: createTaskDto.description || '',
-      status,
-      user: {
-        connect: { id: userId },
+    return this.prismaService.task.create({
+      data: {
+        title: createTaskDto.title,
+        description: createTaskDto.description || '',
+        status,
+        user: { connect: { id: userId } }, // <-- link task to user
       },
-    };
-
-    return this.prismaService.task.create({ data });
+    });
   }
 
-  async updateTask(id: string, updateTaskDto: UpdateTaskStatusDto) {
+  async updateTask(
+    id: string,
+    updateTaskDto: UpdateTaskStatusDto,
+    userId: string,
+  ) {
+    // Ensure only the task owner can update
+    const existingTask = await this.prismaService.task.findFirst({
+      where: { id, userId },
+    });
+    if (!existingTask) {
+      throw new NotFoundException(`Task with id: ${id} not found`);
+    }
+
     const { title, description, status } = updateTaskDto;
 
-    let normalizedStatus = status;
-
     if (
+      status &&
       ![TaskStatus.OPEN, TaskStatus.IN_PROGRESS, TaskStatus.DONE].includes(
         status,
       )
     ) {
       throw new TaskInvalidStatusException(status);
     }
+
     return this.prismaService.task.update({
       where: { id },
       data: {
         ...(title && { title }),
         ...(description && { description }),
-        ...(normalizedStatus && {
-          status: normalizedStatus as TaskStatus,
-        }),
+        ...(status && { status }),
       },
     });
   }
-  async deleteTask(id: string) {
-    try {
-      return await this.prismaService.task.delete({ where: { id } });
-    } catch (error) {
-      if ((error as any)?.code === 'P2025') {
-        throw new NotFoundException(`Task not deleted, ${id} not found`);
-      }
-      throw error;
+
+  async deleteTask(id: string, userId: string) {
+    // Ensure only the task owner can delete
+    const task = await this.prismaService.task.findFirst({
+      where: { id, userId },
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with id: ${id} not found`);
     }
+
+    return this.prismaService.task.delete({ where: { id } });
   }
 }
