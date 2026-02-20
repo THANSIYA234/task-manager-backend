@@ -1,11 +1,11 @@
 'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
+// Use CommonJS module.exports to be robust across different Node/Prisma CLI environments (Render, CI, etc.)
 require('dotenv/config');
-const config_1 = require('prisma/config');
-exports.default = (0, config_1.defineConfig)({
+const { defineConfig, env } = require('prisma/config');
+
+module.exports = defineConfig({
   schema: './prisma/schema.prisma',
   datasource: {
-    url: (0, config_1.env)('DATABASE_URL'),
+    url: env('DATABASE_URL'),
   },
 });
-//# sourceMappingURL=prisma.config.js.map
