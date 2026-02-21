@@ -24,8 +24,13 @@ for (const c of candidates) {
 }
 
 if (!entry) {
-  console.error('Could not find compiled entry. Tried:', candidates.join('\n  '));
-  console.error('Make sure the project was built and the `dist` directory was included in the deploy.');
+  console.error(
+    'Could not find compiled entry. Tried:',
+    candidates.join('\n  '),
+  );
+  console.error(
+    'Make sure the project was built and the `dist` directory was included in the deploy.',
+  );
   process.exit(1);
 }
 
