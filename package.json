@@ -8,6 +8,9 @@
     "start:prod": "npm run build && node dist/main.js",
     "prisma:generate": "prisma generate"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@nestjs/common": "^11.1.13",
     "@nestjs/core": "^11.1.13",
