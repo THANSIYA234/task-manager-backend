@@ -1,5 +1,5 @@
-import { TaskStatus } from '@prisma/client';
 import { IsOptional, IsEnum, IsString } from 'class-validator';
+import { TaskStatus } from '@prisma/client';
 
 export class UpdateTaskStatusDto {
   @IsOptional()
