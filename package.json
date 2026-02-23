@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
     "prisma:generate": "prisma generate"
   },
@@ -38,6 +37,6 @@
     "@types/passport-jwt": "^4.0.1",
     "prisma": "^7.4.1",
     "tsc-alias": "^1.8.16",
-    "typescript": "5.9.3"
+    "typescript": "^5.9.3"
   }
 }
