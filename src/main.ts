@@ -12,7 +12,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:5173',
       'http://localhost:5174',
-      'https://task-manager-frontend-production-9499.up.railway.app',
+      'https://task-manager-frontend-j20i.onrender.com',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
